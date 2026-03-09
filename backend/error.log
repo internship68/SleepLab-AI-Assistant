@@ -1,0 +1,2 @@
+src/modules/chatbot/handlers/handler.interface.ts(2,45): error TS2307: Cannot find module '../../shared/types' or its corresponding type declarations.
+tsconfig.json(19,9): error TS5025: Unknown compiler option 'fallthroughCasesInSwitch'. Did you mean 'noFallthroughCasesInSwitch'?
