@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserContext, ConversationState, ReplyContent } from '../../../shared/types';
 import { ConversationService } from './conversation.service';
+import { GoogleSheetsService } from './google-sheets.service';
 import { createScreeningResultFlex } from '../../line/flex-templates';
 import { getScreeningMessages } from '../../../shared/constants/messages';
 
@@ -18,6 +19,7 @@ export class ScreeningService {
     constructor(
         private readonly conversationService: ConversationService,
         private readonly configService: ConfigService,
+        private readonly googleSheets: GoogleSheetsService,
     ) { }
 
     async start(context: UserContext): Promise<ReplyContent> {
@@ -52,7 +54,7 @@ export class ScreeningService {
                     state: ConversationState.SCREENING_DONE,
                     screeningScore: score,
                 });
-                return this.result(score);
+                return await this.result(score, context);
 
             default:
                 // Re-start screening if called from wrong state
@@ -79,11 +81,22 @@ export class ScreeningService {
     }
 
     // ─── Result ───────────────────────────────────────────
-    private result(score: number): ReplyContent {
+    private async result(score: number, context: UserContext): Promise<ReplyContent> {
         const msgs = this.getMessages();
         const contactKey = this.configService.get<string>('chatbot.contactMenuKey') ?? 'E';
         const articleUrl = this.configService.get<string>('chatbot.sleepHygieneArticleUrl') ?? '';
-        if (score >= 2) {
+        const isHighRisk = score >= 2;
+        const resultType = isHighRisk ? 'High Risk' : 'Low Risk';
+        const recommendation = isHighRisk ? msgs.highRisk : msgs.lowRisk;
+
+        this.googleSheets.logScreeningResult(
+            context,
+            resultType,
+            score,
+            recommendation.replace(/\n/g, ' ').slice(0, 500),
+        ).catch(() => { /* ignore */ });
+
+        if (isHighRisk) {
             return createScreeningResultFlex(true, msgs.highRisk, contactKey);
         }
         return createScreeningResultFlex(false, msgs.lowRisk, contactKey, {

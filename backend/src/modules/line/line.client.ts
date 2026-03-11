@@ -15,6 +15,16 @@ export class LineClient {
         });
     }
 
+    /** ดึง display name จาก LINE Profile API */
+    async getDisplayName(userId: string): Promise<string | null> {
+        try {
+            const profile = await this.client.getProfile(userId);
+            return profile?.displayName ?? null;
+        } catch {
+            return null;
+        }
+    }
+
     /** ส่งข้อความ (รองรับทั้ง text และ Flex Message) */
     async replyMessage(replyToken: string, content: ReplyContent): Promise<void> {
         try {

@@ -14,3 +14,12 @@ export const chatbotConfig = registerAs('chatbot', () => ({
     /** ลิงก์บทความ Sleep Hygiene (Low Risk screening) */
     sleepHygieneArticleUrl: process.env.SLEEP_HYGIENE_ARTICLE_URL || '',
 }));
+
+export const googleSheetsConfig = registerAs('googleSheets', () => ({
+    /** path ไปยัง Service Account JSON (หรือใช้ GOOGLE_APPLICATION_CREDENTIALS) */
+    credentialsPath: process.env.GOOGLE_SHEETS_CREDENTIALS_PATH || process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    /** Spreadsheet ID จาก URL: .../d/SPREADSHEET_ID/edit */
+    spreadsheetId: process.env.GOOGLE_SHEETS_SPREADSHEET_ID || '',
+    /** ชื่อ Sheet/Tab (default: Sheet1) */
+    sheetName: process.env.GOOGLE_SHEETS_SHEET_NAME || 'ผลการประเมิน',
+}));

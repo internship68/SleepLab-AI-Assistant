@@ -1,0 +1,4 @@
+# ป้องกัน LF/CRLF warning บน Windows
+* text=auto eol=lf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf

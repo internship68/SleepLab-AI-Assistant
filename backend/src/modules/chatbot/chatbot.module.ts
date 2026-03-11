@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LineClientModule } from '../line/line-client.module';
 import { MessageRouter } from './router/message.router';
 import { GreetingHandler } from './handlers/greeting.handler';
 import { ScreeningHandler } from './handlers/screening.handler';
@@ -10,6 +11,7 @@ import { CPAPHandler } from './handlers/cpap.handler';
 import { ElderlyHandler } from './handlers/elderly.handler';
 import { ConversationService } from './services/conversation.service';
 import { ScreeningService } from './services/screening.service';
+import { GoogleSheetsService } from './services/google-sheets.service';
 import { FAQService } from './services/faq.service';
 import { OASettingsService } from './services/oa-settings.service';
 import { RAGModule } from '../../rag/rag.module';
@@ -21,6 +23,7 @@ import { OASettings } from './entities/oa-settings.entity';
 @Module({
     imports: [
         TypeOrmModule.forFeature([User, Conversation, OASettings]),
+        LineClientModule,
         RAGModule,
         AIModule,
     ],
@@ -35,6 +38,7 @@ import { OASettings } from './entities/oa-settings.entity';
         ElderlyHandler,
         ConversationService,
         ScreeningService,
+        GoogleSheetsService,
         FAQService,
         OASettingsService,
     ],

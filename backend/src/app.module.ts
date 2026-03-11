@@ -11,7 +11,7 @@ import { lineConfig } from './config/line.config';
 import { openaiConfig } from './config/openai.config';
 import { geminiConfig } from './config/gemini.config';
 import { databaseConfig } from './config/database.config';
-import { chatbotConfig } from './config/chatbot.config';
+import { chatbotConfig, googleSheetsConfig } from './config/chatbot.config';
 import { User } from './modules/chatbot/entities/user.entity';
 import { Conversation } from './modules/chatbot/entities/conversation.entity';
 import { OASettings } from './modules/chatbot/entities/oa-settings.entity';
@@ -21,7 +21,7 @@ import { FaqChunk } from './knowledge-base/entities/faq-chunk.entity';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [lineConfig, openaiConfig, geminiConfig, databaseConfig, chatbotConfig],
+            load: [lineConfig, openaiConfig, geminiConfig, databaseConfig, chatbotConfig, googleSheetsConfig],
         }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
