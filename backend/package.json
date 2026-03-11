@@ -14,7 +14,8 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix",
     "index:pdf": "ts-node --project tsconfig.json scripts/indexing/index-pdf.ts --file knowledge-base.pdf",
-    "index:txt": "ts-node --project tsconfig.json scripts/indexing/index-pdf.ts"
+    "index:txt": "ts-node --project tsconfig.json scripts/indexing/index-pdf.ts",
+    "clear-test-data": "ts-node --project tsconfig.json scripts/db/clear-test-data.ts"
   },
   "dependencies": {
     "@line/bot-sdk": "^7.5.0",

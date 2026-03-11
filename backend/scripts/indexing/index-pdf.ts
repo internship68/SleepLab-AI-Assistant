@@ -10,7 +10,10 @@
  *                        → reads knowledge-base.txt (default)
  *
  *   npx ts-node scripts/indexing/index-pdf.ts --file knowledge-base.pdf
- *                        → reads a specific file
+ *                        → ไฟล์ใน backend/
+ *
+ *   npx ts-node scripts/indexing/index-pdf.ts --file "C:\path\to\FAQ 300 คำถาม.pdf"
+ *                        → path แบบ absolute (ใส่ quotes ถ้ามีช่องว่าง)
  *
  * Prerequisites:
  *   1. .env must have OPENAI_API_KEY and DATABASE_URL set.
@@ -39,7 +42,7 @@ const BATCH_SIZE = 20;
 
 const DB_CONFIG = {
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: true },
 };
 
 // ─── Clients ────────────────────────────────────────────
@@ -115,7 +118,7 @@ async function main() {
         process.exit(1);
     }
 
-    // Determine source file
+    // Determine source file (รองรับ path แบบ absolute หรือ relative จาก backend/)
     const args = process.argv.slice(2);
     const fileArgIndex = args.indexOf('--file');
     const sourceFile =
@@ -123,11 +126,13 @@ async function main() {
             ? args[fileArgIndex + 1]
             : 'knowledge-base.txt'; // ← default
 
-    const filePath = path.resolve(__dirname, '../../', sourceFile);
+    const filePath = path.isAbsolute(sourceFile)
+        ? sourceFile
+        : path.resolve(__dirname, '../../', sourceFile);
     if (!fs.existsSync(filePath)) {
         console.error(`❌ File not found: ${filePath}`);
         console.error(
-            `   Create backend/knowledge-base.txt and paste all FAQ content there.`,
+            `   ใช้ path แบบ absolute หรือวางไฟล์ใน backend/ แล้วระบุชื่อไฟล์`,
         );
         process.exit(1);
     }

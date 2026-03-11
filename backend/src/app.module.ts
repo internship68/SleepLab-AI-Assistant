@@ -37,9 +37,10 @@ import { FaqChunk } from './knowledge-base/entities/faq-chunk.entity';
                             password: configService.get<string>('database.password'),
                             database: configService.get<string>('database.database'),
                         }),
-                    ssl: dbUrl ? { rejectUnauthorized: false } : false,
+                    ssl: dbUrl ? { rejectUnauthorized: true } : false,
                     entities: [User, Conversation, OASettings, FaqChunk],
                     synchronize: process.env.NODE_ENV !== 'production',
+                    extra: { max: 2 }, // ลด concurrent queries เพื่อหลีกเลี่ยง pg DeprecationWarning
                 };
             },
         }),

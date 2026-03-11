@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UserContext, ConversationState } from '../../../shared/types';
 import { ScreeningHandler } from '../handlers/screening.handler';
 import { FAQHandler } from '../handlers/faq.handler';
@@ -36,6 +36,8 @@ const MENU_MAP: Record<string, ConversationState> = {
 
 @Injectable()
 export class MessageRouter {
+    private readonly logger = new Logger(MessageRouter.name);
+
     constructor(
         private readonly greetingHandler: GreetingHandler,
         private readonly screeningHandler: ScreeningHandler,
@@ -50,20 +52,16 @@ export class MessageRouter {
     async route(message: string, context: UserContext): Promise<string> {
         const lower = message.toLowerCase().trim();
 
-        // ── Greeting triggers ────────────────────────────────
-        const isGreeting = ['สวัสดี', 'hi', 'hello', 'start', 'เริ่ม'].some(g => lower.includes(g));
-        if (isGreeting || context.state === ConversationState.START) {
-            return this.greetingHandler.handle(message, context);
-        }
-
         // ── Screening flow — answer to Q1/Q2/Q3 ─────────────
         if ([ConversationState.SCREENING_Q1, ConversationState.SCREENING_Q2, ConversationState.SCREENING_Q3].includes(context.state)) {
+            this.logger.log(`[ROUTER] → ScreeningHandler (state=${context.state})`);
             return this.screeningHandler.handle(message, context);
         }
 
-        // ── Menu selection detection ─────────────────────────
+        // ── Menu selection (ตรวจก่อน greeting — ถ้ากด A/B/C/D/E ให้ไปเมนูนั้นเลย) ─────
         const selectedState = this.detectMenu(lower);
         if (selectedState) {
+            this.logger.log(`[ROUTER] → Menu selected: ${selectedState}`);
             await this.conversationService.updateContext(context.userId, { state: selectedState });
             const updatedContext = { ...context, state: selectedState };
 
@@ -84,7 +82,15 @@ export class MessageRouter {
             }
         }
 
+        // ── Greeting triggers (เมื่อ state=START หรือพิมพ์คำทักทาย) ────────────────────
+        const isGreeting = ['สวัสดี', 'hi', 'hello', 'start', 'เริ่ม'].some(g => lower.includes(g));
+        if (isGreeting || context.state === ConversationState.START) {
+            this.logger.log(`[ROUTER] → GreetingHandler (isGreeting=${isGreeting}, state=${context.state})`);
+            return this.greetingHandler.handle(message, context);
+        }
+
         // ── Contextual follow-up based on current state ──────
+        this.logger.log(`[ROUTER] → By state: ${context.state}`);
         switch (context.state) {
             case ConversationState.SLEEP_LAB:
                 return this.sleepLabHandler.handle(message, context);
@@ -97,7 +103,6 @@ export class MessageRouter {
             case ConversationState.SCREENING_DONE:
             case ConversationState.FAQ:
             default:
-                // RAG fallback for any free-text question
                 return this.faqHandler.handle(message, context);
         }
     }

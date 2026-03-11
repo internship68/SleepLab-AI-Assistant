@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserContext, ConversationState } from '../../../shared/types';
@@ -7,6 +7,8 @@ import { Conversation } from '../entities/conversation.entity';
 
 @Injectable()
 export class ConversationService {
+    private readonly logger = new Logger(ConversationService.name);
+
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
@@ -20,6 +22,7 @@ export class ConversationService {
         });
 
         if (!user) {
+            this.logger.log(`[DB] New user | lineUserId=${lineUserId} | lineOaId=${lineOaId}`);
             user = this.userRepository.create({
                 lineUserId,
                 lineOaId,
@@ -46,6 +49,7 @@ export class ConversationService {
         if (updates.screeningStep !== undefined) updateObj.screeningStep = updates.screeningStep;
         if (updates.screeningScore !== undefined) updateObj.screeningScore = updates.screeningScore;
         if (updates.lastMessage !== undefined) updateObj.lastMessage = updates.lastMessage;
+        this.logger.log(`[DB] updateContext | ${JSON.stringify(updateObj)}`);
         await this.userRepository.update({ id: userId }, updateObj);
     }
 
